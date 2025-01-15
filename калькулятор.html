@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Калькулятор пребывания</title>
+    <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+    <div class="container">
+        <div class="logo">
+            <img src="images/logo.png" alt="Логотип">
+            <h1>Департамент Пограничной Службы Республики Казахстан по ЗКО</h1>
+            <h2>Учебный центр "Орал"</h2>
+        </div>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            margin: 20px;
+        }
+
+        .container {
+            border: 5px solid #FFD700; /* Золотая обводка */
+            padding: 20px;
+            margin: 20px auto;
+            max-width: 800px;
+            box-shadow: 0 0 15px 5px rgba(255, 215, 0, 0.3);
+        }
+
+        .calendar-container {
+            display: flex;
+            justify-content: center;
+            margin-top: 20px;
+            border: 2px solid orange;
+            padding: 10px;
+        }
+
+        #calendar {
+            padding: 10px;
+            font-size: 16px;
+            width: 250px;
+        }
+
+        button {
+            padding: 10px 20px;
+            font-size: 16px;
+            margin-left: 10px;
+            cursor: pointer;
+            background-color: #007BFF;
+            color: white;
+        }
+
+        #180-days-result-container {
+            margin-top: 20px;
+            font-size: 16px;
+        }
+
+        #180-days-result {
+            color: green;
+            font-weight: bold;
+        }
+
+        .date-group {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+
+        .entry-date, .exit-date {
+            padding: 10px;
+            font-size: 16px;
+            width: 250px;
+        }
+
+        .result-box {
+            margin-left: 10px;
+            padding: 10px;
+            background-color: #f4f4f4;
+            font-size: 16px;
+        }
+
+        .remove {
+            background-color: #ff4d4d;
+            color: white;
+            border: none;
+            padding: 10px;
+            cursor: pointer;
+        }
+
+        .actions {
+            margin-top: 20px;
+        }
+
+        /* Орнамент добавленный через шрифт */
+        .ornament {
+            display: block;
+            font-size: 40px;
+            color: #FFD700;
+        }
+
+        /* Адаптивность */
+        @media screen and (max-width: 600px) {
+            #calendar, .entry-date, .exit-date {
+                width: 100%;
+            }
+
+            button, .remove {
+                width: 100%;
+                margin: 5px 0;
+            }
+
+            .date-group {
+                flex-direction: column;
+                align-items: stretch;
+            }
+
+            .result-box {
+                text-align: center;
+                margin-top: 5px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Календарь с датой 180 дней назад</h1>
+        <div id="calendar-container">
+            <input type="date" id="calendar" />
+            <button onclick="setDate180DaysAgo()">Показать 180 дней назад</button>
+        </div>
+        <div id="180-days-result-container">
+            Дата 180 дней назад: <span id="180-days-result"></span>
+        </div>
+
+        <h2>Калькулятор расчета дней пребывания иностранных граждан в РК</h2>
+        <div id="date-container">
+            <div class="date-group">
+                <input type="date" class="entry-date" placeholder="Дата въезда">
+                <input type="date" class="exit-date" placeholder="Дата выезда">
+                <span class="result-box" id="result-box1">0</span>
+                <span class="result-text"></span>
+                <button class="remove">-</button>
+            </div>
+        </div>
+        <button id="add-date" class="add-button">Добавить въезд/выезд</button>
+      <div class="actions">
+            <button id="calculate">Рассчитать</button>
+            <button id="reset" class="reset">Сброс</button>
+        </div>
+        <div class="total-days">
+            Общее количество дней: <span id="total-days">0</span>
+        </div>
+    </div>
+
+    <script>
+        // Установить текущую дату в календарь при загрузке страницы
+        document.addEventListener("DOMContentLoaded", function() {
+            const calendar = document.getElementById("calendar");
+            const today = new Date();
+            calendar.value = today.toISOString().split('T')[0];
+        });
+
+        // Функция для вычисления даты 180 дней назад
+        function setDate180DaysAgo() {
+            const calendar = document.getElementById("calendar");
+            const today = new Date(calendar.value);
+            const pastDate = new Date(today);
+            pastDate.setDate(today.getDate() - 180);
+
+            document.getElementById("180-days-result").textContent = pastDate.toISOString().split('T')[0];
+        }
+
+        // Функция для расчета дней пребывания
+        function calculateStayDuration() {
+            const entryDateElements = document.querySelectorAll('.entry-date');
+            const exitDateElements = document.querySelectorAll('.exit-date');
+            const totalDaysElement = document.getElementById("total-days");
+            const individualResultsElement = document.getElementById("individual-results");
+
+            let totalDays = 0;
+            let individualResultsHTML = "";
+
+            entryDateElements.forEach((entryDateElem, index) => {
+                const entryDate = new Date(entryDateElem.value);
+                const exitDate = new Date(exitDateElements[index].value);
+
+                if (!isNaN(entryDate) && !isNaN(exitDate)) {
+                    const timeDifference = exitDate - entryDate;
+                    if (timeDifference >= 0) {
+                        const duration = timeDifference / (1000 * 60 * 60 * 24);
+                        totalDays += duration;
+
+                        const resultContainer = document.querySelectorAll(".result-box")[index];
+                        resultContainer.textContent = duration;
+                    }
+                }
+            });
+
+            totalDaysElement.textContent = totalDays;
+
+            // Отображение индивидуальных результатов рядом с группами
+            let index = 1;
+            individualResultsHTML = "";
+            entryDateElements.forEach((entryDateElem, idx) => {
+                const entryDate = entryDateElem.value;
+                const exitDate = exitDateElements[idx].value;
+                individualResultsHTML += `<div>Вкладка ${index++}: ${entryDate} - ${exitDate} = ${document.querySelectorAll(".result-box")[idx].textContent} дней</div>`;
+            });
+            individualResultsElement.innerHTML = individualResultsHTML;
+        }
+
+        // Обновление результата при нажатии на кнопку "Рассчитать"
+        document.getElementById("calculate").addEventListener("click", function() {
+            calculateStayDuration();
+        });
+
+        // Добавление новой группы для ввода въезда/выезда
+        document.getElementById("add-date").addEventListener("click", function() {
+            const dateContainer = document.getElementById("date-container");
+
+            const newDateGroup = document.createElement("div");
+            newDateGroup.className = "date-group";
+
+            const newEntryInput = document.createElement("input");
+            newEntryInput.type = "date";
+            newEntryInput.className = "entry-date";
+            newEntryInput.placeholder = "Дата въезда";
+
+            const newExitInput = document.createElement("input");
+            newExitInput.type = "date";
+            newExitInput.className = "exit-date";
+            newExitInput.placeholder = "Дата выезда";
+
+            const newResultBox = document.createElement("span");
+            newResultBox.className = "result-box";
+            newResultBox.textContent = "0";
+
+            const newRemoveButton = document.createElement("button");
+            newRemoveButton.className = "remove";
+            newRemoveButton.textContent = "-";
+
+            // Добавляем элементам обработчик событий для удаления
+            newRemoveButton.addEventListener("click", function() {
+                dateContainer.removeChild(newDateGroup);
+            });
+
+            newDateGroup.appendChild(newEntryInput);
+            newDateGroup.appendChild(newExitInput);
+            newDateGroup.appendChild(newResultBox);
+            newDateGroup.appendChild(newRemoveButton);
+
+            dateContainer.appendChild(newDateGroup);
+        });
+
+        // Функция для сброса всех данных и вкладок
+        document.getElementById("reset").addEventListener("click", function() {
+            const dateContainer = document.getElementById("date-container");
+
+            // Удаление всех групп с заполненными датами
+            const dateGroups = document.querySelectorAll('.date-group');
+            dateGroups.forEach(group => {
+                const entryDate = group.querySelector('.entry-date').value;
+                const exitDate = group.querySelector('.exit-date').value;
+
+                if (entryDate === "" || exitDate === "") {
+                    dateContainer.removeChild(group);
+                }
+            });
+
+            // Очистка всех результатов
+            document.querySelectorAll(".result-box").forEach(result => result.textContent = "0");
+            document.getElementById("total-days").textContent = "0";
+            document.getElementById("individual-results").innerHTML = "";
+        });
+    </script>
+</body>
+</html>
